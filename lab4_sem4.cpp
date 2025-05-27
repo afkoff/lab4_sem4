@@ -14,7 +14,7 @@ void vectorAddCPU(const float* A, const float* B, float* C, int N) {
 }
 
 // GPU-ядро для сложения векторов
-global void vectorAddGPU(const float* A, const float* B, float* C, int N) {
+__global__ void vectorAddGPU(const float* A, const float* B, float* C, int N) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < N) {
         C[i] = A[i] + B[i];
@@ -32,7 +32,7 @@ void brightenCPU(const unsigned char* input, unsigned char* output, int size, in
 }
 
 // GPU-ядро для увеличения яркости
-global void brightenGPU(const unsigned char* input, unsigned char* output, int size, int delta) {
+__global__ void brightenGPU(const unsigned char* input, unsigned char* output, int size, int delta) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < size) {
         int value = input[i] + delta;
@@ -83,7 +83,7 @@ int main() {
     printf("GPU время: %.3f мс\n", (end - start) * 1000.0 / CLOCKS_PER_SEC);
     
     cudaMemcpy(h_C_gpu, d_C, vectorSize, cudaMemcpyDeviceToHost);
-
+    
     int errors = 0;
     for (int i = 0; i < N; i++) {
         if (fabs(h_C_cpu[i] - h_C_gpu[i]) > 0.0001f) {
@@ -112,7 +112,7 @@ int main() {
     for (int i = 0; i < IMG_SIZE; i++) {
         h_img[i] = rand() % 256;
     }
-    
+
     start = clock();
     brightenCPU(h_img, h_res_cpu, IMG_SIZE, BRIGHTNESS_DELTA);
     end = clock();
